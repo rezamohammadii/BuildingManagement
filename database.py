@@ -1,5 +1,5 @@
 """
-Database layer for the Building Management System.
+Database layer for the Building Management web app.
 Handles SQLite connection setup and schema creation.
 """
 
@@ -22,7 +22,6 @@ def init_database():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Global building settings (single row, id = 1)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -34,7 +33,6 @@ def init_database():
         )
     """)
 
-    # Each unit in the building and how many people live there
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS units (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +41,6 @@ def init_database():
         )
     """)
 
-    # Monthly charge payments deposited by each unit
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS payments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,7 +51,6 @@ def init_database():
         )
     """)
 
-    # Water bill entries (one per calculation run)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS water_bills (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,7 +62,6 @@ def init_database():
         )
     """)
 
-    # Per-unit share of a given water bill
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS water_bill_shares (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +73,6 @@ def init_database():
         )
     """)
 
-    # General building expenses (title, amount, date)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS expenses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,10 +88,7 @@ def init_database():
 
 
 def is_configured() -> bool:
-    """Check whether the initial setup wizard has already been completed."""
     conn = get_connection()
-    row = conn.execute(
-        "SELECT is_configured FROM settings WHERE id = 1"
-    ).fetchone()
+    row = conn.execute("SELECT is_configured FROM settings WHERE id = 1").fetchone()
     conn.close()
     return bool(row and row["is_configured"] == 1)

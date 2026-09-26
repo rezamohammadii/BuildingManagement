@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Water Bill — Building Management{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Water Bill</h1>
+    <div class="sub">Shared water cost, split across units by people count</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>Calculate a new water bill</h2></div>
+  <div class="panel-body">
+    <form method="POST" action="{{ url_for('add_water_bill_route') }}">
+      <div class="form-grid">
+        <div class="field">
+          <label for="bill_month">Bill month</label>
+          <input type="text" id="bill_month" name="bill_month" value="{{ current_month }}" placeholder="1404-06" required>
+          <div class="hint">Jalali calendar, e.g. 1404-06</div>
+        </div>
+        <div class="field">
+          <label for="total_amount">Total water bill amount</label>
+          <input type="number" min="0" step="0.01" id="total_amount" name="total_amount" required>
+        </div>
+      </div>
+      <div class="hint" style="margin-bottom: 12px;">Total people in the building: {{ total_people }}</div>
+      <button type="submit" class="btn">Calculate and save</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>History ({{ bills|length }})</h2></div>
+  <table class="ledger">
+    <thead>
+      <tr><th>Month</th><th class="num">Total</th><th class="num">People</th><th class="num">Per person</th><th class="num">Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for b in bills %}
+      <tr>
+        <td>{{ b.bill_month }}</td>
+        <td class="num amount">{{ "%.0f"|format(b.total_amount) }}</td>
+        <td class="num">{{ b.total_people }}</td>
+        <td class="num amount">{{ "%.0f"|format(b.cost_per_person) }}</td>
+        <td class="actions">
+          <a href="{{ url_for('water_bill_detail', water_bill_id=b.id) }}" class="btn secondary small">Shares</a>
+          <a href="{{ url_for('edit_water_bill_page', water_bill_id=b.id) }}" class="btn secondary small">Edit</a>
+          <form class="inline" method="POST" action="{{ url_for('delete_water_bill_route', water_bill_id=b.id) }}" onsubmit="return confirm('Delete this water bill?');">
+            <button type="submit" class="btn danger small">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-row">No water bills recorded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

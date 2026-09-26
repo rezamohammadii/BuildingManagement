@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Payments — Building Management{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Payments</h1>
+    <div class="sub">Charge deposits recorded per unit</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>Register a new deposit</h2></div>
+  <div class="panel-body">
+    <form method="POST" action="{{ url_for('add_payment_route') }}">
+      <div class="form-grid">
+        <div class="field">
+          <label for="unit_number">Unit</label>
+          <select id="unit_number" name="unit_number" required>
+            {% for u in units %}
+            <option value="{{ u.unit_number }}">Unit {{ u.unit_number }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="amount">Amount</label>
+          <input type="number" min="0" step="0.01" id="amount" name="amount" required>
+        </div>
+        <div class="field">
+          <label for="payment_date">Payment date</label>
+          <input type="text" id="payment_date" name="payment_date" value="{{ today }}" pattern="\d{4}-\d{2}-\d{2}" placeholder="1404-06-20" required>
+          <div class="hint">Jalali calendar, format YYYY-MM-DD</div>
+        </div>
+      </div>
+      <button type="submit" class="btn">Register deposit</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <h2>All deposits ({{ payments|length }})</h2>
+    <span class="muted amount">Total: {{ "%.0f"|format(total) }}</span>
+  </div>
+  <table class="ledger">
+    <thead>
+      <tr><th>Unit</th><th class="num">Amount</th><th>Date</th><th class="num">Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for p in payments %}
+      <tr>
+        <td>Unit {{ p.unit_number }}</td>
+        <td class="num amount">{{ "%.0f"|format(p.amount) }}</td>
+        <td>{{ p.payment_date }}</td>
+        <td class="actions">
+          <a href="{{ url_for('edit_payment_page', payment_id=p.id) }}" class="btn secondary small">Edit</a>
+          <form class="inline" method="POST" action="{{ url_for('delete_payment_route', payment_id=p.id) }}" onsubmit="return confirm('Delete this payment?');">
+            <button type="submit" class="btn danger small">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-row">No payments recorded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

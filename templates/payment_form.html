@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Edit Payment — Building Management{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Edit Payment</h1>
+    <div class="sub">Payment #{{ payment.id }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-body">
+    <form method="POST" action="{{ url_for('update_payment_route', payment_id=payment.id) }}">
+      <div class="form-grid">
+        <div class="field">
+          <label for="unit_number">Unit</label>
+          <select id="unit_number" name="unit_number" required>
+            {% for u in units %}
+            <option value="{{ u.unit_number }}" {{ 'selected' if u.unit_number == payment.unit_number else '' }}>Unit {{ u.unit_number }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="amount">Amount</label>
+          <input type="number" min="0" step="0.01" id="amount" name="amount" value="{{ payment.amount }}" required>
+        </div>
+        <div class="field">
+          <label for="payment_date">Payment date</label>
+          <input type="text" id="payment_date" name="payment_date" value="{{ payment.payment_date }}" pattern="\d{4}-\d{2}-\d{2}" required>
+          <div class="hint">Jalali calendar, format YYYY-MM-DD</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="submit" class="btn">Save changes</button>
+        <a href="{{ url_for('payments_page') }}" class="btn secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

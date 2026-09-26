@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Expenses — Building Management{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>General Expenses</h1>
+    <div class="sub">Building-wide expenses — title, amount, date</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>Add a new expense</h2></div>
+  <div class="panel-body">
+    <form method="POST" action="{{ url_for('add_expense_route') }}">
+      <div class="form-grid">
+        <div class="field">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" required>
+        </div>
+        <div class="field">
+          <label for="amount">Amount</label>
+          <input type="number" min="0" step="0.01" id="amount" name="amount" required>
+        </div>
+        <div class="field">
+          <label for="expense_date">Date</label>
+          <input type="text" id="expense_date" name="expense_date" value="{{ today }}" pattern="\d{4}-\d{2}-\d{2}" required>
+          <div class="hint">Jalali calendar, format YYYY-MM-DD</div>
+        </div>
+      </div>
+      <button type="submit" class="btn">Add expense</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <h2>All expenses ({{ expenses|length }})</h2>
+    <span class="muted amount">Total: {{ "%.0f"|format(total) }}</span>
+  </div>
+  <table class="ledger">
+    <thead>
+      <tr><th>Title</th><th class="num">Amount</th><th>Date</th><th class="num">Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for e in expenses %}
+      <tr>
+        <td>{{ e.title }}</td>
+        <td class="num amount">{{ "%.0f"|format(e.amount) }}</td>
+        <td>{{ e.expense_date }}</td>
+        <td class="actions">
+          <a href="{{ url_for('edit_expense_page', expense_id=e.id) }}" class="btn secondary small">Edit</a>
+          <form class="inline" method="POST" action="{{ url_for('delete_expense_route', expense_id=e.id) }}" onsubmit="return confirm('Delete this expense?');">
+            <button type="submit" class="btn danger small">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-row">No expenses recorded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Report — Building Management{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Financial Report</h1>
+    <div class="sub">Overall income vs. expenses for the building</div>
+  </div>
+  <form method="POST" action="{{ url_for('export_report_route') }}">
+    <button type="submit" class="btn">Export to Excel</button>
+  </form>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="label">Total income (charge deposits)</div>
+    <div class="value amount">{{ "%.0f"|format(summary.total_income) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Total general expenses</div>
+    <div class="value amount">{{ "%.0f"|format(summary.total_general_expenses) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Total water bill expenses</div>
+    <div class="value amount">{{ "%.0f"|format(summary.total_water_expenses) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Total expenses (all)</div>
+    <div class="value amount">{{ "%.0f"|format(summary.total_expenses) }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>Net balance</h2></div>
+  <div class="panel-body">
+    <div class="stat {{ 'positive' if summary.net_balance >= 0 else 'negative' }}" style="border: none; padding: 0;">
+      <div class="value amount" style="font-size: 32px;">{{ "%.0f"|format(summary.net_balance) }}</div>
+      <div class="muted" style="margin-top: 6px;">
+        {% if summary.net_balance >= 0 %}
+          The building's finances are in a positive balance.
+        {% else %}
+          The building is currently in a deficit.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

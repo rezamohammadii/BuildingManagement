@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Building Management{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Dashboard</h1>
+    <div class="sub">{{ settings.total_units }} units · {{ total_people }} people · {{ today }}</div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat brass">
+    <div class="label">Charge per unit / month</div>
+    <div class="value amount">{{ "%.0f"|format(settings.charge_amount) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Total income to date</div>
+    <div class="value amount">{{ "%.0f"|format(summary.total_income) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Total expenses to date</div>
+    <div class="value amount">{{ "%.0f"|format(summary.total_expenses) }}</div>
+  </div>
+  <div class="stat {{ 'positive' if summary.net_balance >= 0 else 'negative' }}">
+    <div class="label">Net balance</div>
+    <div class="value amount">{{ "%.0f"|format(summary.net_balance) }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <h2>Units</h2>
+    <a href="{{ url_for('settings_page') }}" class="btn secondary small">Manage settings</a>
+  </div>
+  <table class="ledger">
+    <thead>
+      <tr><th>Unit</th><th class="num">People</th></tr>
+    </thead>
+    <tbody>
+      {% for u in units %}
+      <tr>
+        <td>{{ u.unit_number }}</td>
+        <td class="num">{{ u.people_count }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="2" class="empty-row">No units configured.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

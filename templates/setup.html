@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setup — Building Management</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="setup-wrap">
+    <div class="kicker">First-run configuration</div>
+    <h1>Set up your building</h1>
+    <p class="lead">Tell us how many units the building has, how many people live in each one, and the monthly charge amount. You can edit all of this later from Settings.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('setup') }}">
+      <div class="form-grid">
+        <div class="field">
+          <label for="total_units">Total number of units</label>
+          <input type="number" min="1" id="total_units" name="total_units" value="{{ total_units or '' }}" required>
+        </div>
+        <div class="field">
+          <label for="charge_amount">Monthly charge per unit</label>
+          <input type="number" min="0" step="0.01" id="charge_amount" name="charge_amount" value="{{ charge_amount or '' }}" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>People per unit</label>
+        <div class="hint">Fill in how many people live in each unit.</div>
+      </div>
+      <div id="units-fields"></div>
+
+      <div class="btn-row" style="margin-top: 20px;">
+        <button type="submit" class="btn">Save and continue</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const totalUnitsInput = document.getElementById('total_units');
+    const unitsFields = document.getElementById('units-fields');
+    const existingValues = {{ people_values | tojson }};
+
+    function renderUnitFields() {
+      const count = parseInt(totalUnitsInput.value, 10) || 0;
+      unitsFields.innerHTML = '';
+      for (let i = 1; i <= count; i++) {
+        const wrap = document.createElement('div');
+        wrap.className = 'field';
+        const label = document.createElement('label');
+        label.textContent = 'Unit ' + i + ' — people';
+        label.setAttribute('for', 'people_' + i);
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '0';
+        input.id = 'people_' + i;
+        input.name = 'people_' + i;
+        input.value = existingValues[i] !== undefined ? existingValues[i] : 1;
+        input.required = true;
+        wrap.appendChild(label);
+        wrap.appendChild(input);
+        unitsFields.appendChild(wrap);
+      }
+    }
+
+    totalUnitsInput.addEventListener('input', renderUnitFields);
+    renderUnitFields();
+  </script>
+</body>
+</html>

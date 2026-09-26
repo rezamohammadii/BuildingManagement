@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Settings — Building Management{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Settings</h1>
+    <div class="sub">Building configuration — editable at any time</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>Monthly charge</h2></div>
+  <div class="panel-body">
+    <form method="POST" action="{{ url_for('update_charge') }}">
+      <div class="form-grid" style="grid-template-columns: minmax(200px, 260px) auto;">
+        <div class="field">
+          <label for="charge_amount">Amount per unit</label>
+          <input type="number" min="0" step="0.01" id="charge_amount" name="charge_amount" value="{{ settings.charge_amount }}" required>
+        </div>
+      </div>
+      <button type="submit" class="btn">Save</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>Units ({{ units|length }})</h2></div>
+  <table class="ledger">
+    <thead>
+      <tr><th>Unit</th><th class="num">People</th><th class="num">Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for u in units %}
+      <tr>
+        <form method="POST" action="{{ url_for('update_unit', unit_number=u.unit_number) }}">
+        <td>{{ u.unit_number }}</td>
+        <td class="num">
+          <input type="number" min="0" name="people_count" value="{{ u.people_count }}" style="width: 80px; text-align:right;">
+        </td>
+        <td class="actions">
+          <button type="submit" class="btn secondary small">Save</button>
+        </td>
+        </form>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="empty-row">No units yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>Add a new unit</h2></div>
+  <div class="panel-body">
+    <form method="POST" action="{{ url_for('add_unit_route') }}">
+      <div class="form-grid" style="grid-template-columns: 160px 160px auto;">
+        <div class="field">
+          <label for="unit_number">Unit number</label>
+          <input type="number" min="1" id="unit_number" name="unit_number" value="{{ suggested_unit_number }}" required>
+        </div>
+        <div class="field">
+          <label for="people_count">People count</label>
+          <input type="number" min="0" id="people_count" name="people_count" value="1" required>
+        </div>
+      </div>
+      <button type="submit" class="btn">Add unit</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

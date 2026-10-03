@@ -16,6 +16,15 @@ app = Flask(__name__)
 app.secret_key = "building-management-local-secret"  # local single-user app
 
 
+@app.template_filter("money")
+def money_filter(value):
+    """Format a number with thousands separators, e.g. 4000 -> 4,000."""
+    try:
+        return "{:,.0f}".format(float(value))
+    except (TypeError, ValueError):
+        return value
+
+
 # --------------------------------------------------------------------------
 # Setup gate: every request must go through /setup until configured
 # --------------------------------------------------------------------------
@@ -75,6 +84,8 @@ def dashboard():
     settings = services.get_settings()
     summary = services.build_summary()
     total_people = sum(u["people_count"] for u in units)
+    current_month = services.today_jalali()[:7]
+    unpaid_units = services.get_unpaid_units_for_month(current_month)
     return render_template(
         "dashboard.html",
         active="dashboard",
@@ -83,6 +94,8 @@ def dashboard():
         summary=summary,
         total_people=total_people,
         today=services.today_jalali(),
+        current_month=current_month,
+        unpaid_units=unpaid_units,
     )
 
 

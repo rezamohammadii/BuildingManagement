@@ -11,20 +11,44 @@
 <div class="stats">
   <div class="stat brass">
     <div class="label">Charge per unit / month</div>
-    <div class="value amount">{{ "%.0f"|format(settings.charge_amount) }}</div>
+    <div class="value amount">{{ settings.charge_amount|money }}</div>
   </div>
   <div class="stat">
     <div class="label">Total income to date</div>
-    <div class="value amount">{{ "%.0f"|format(summary.total_income) }}</div>
+    <div class="value amount">{{ summary.total_income|money }}</div>
   </div>
   <div class="stat">
     <div class="label">Total expenses to date</div>
-    <div class="value amount">{{ "%.0f"|format(summary.total_expenses) }}</div>
+    <div class="value amount">{{ summary.total_expenses|money }}</div>
   </div>
   <div class="stat {{ 'positive' if summary.net_balance >= 0 else 'negative' }}">
     <div class="label">Net balance</div>
-    <div class="value amount">{{ "%.0f"|format(summary.net_balance) }}</div>
+    <div class="value amount">{{ summary.net_balance|money }}</div>
   </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <h2>Unpaid charge — {{ current_month }}</h2>
+    <a href="{{ url_for('payments_page') }}" class="btn secondary small">Go to payments</a>
+  </div>
+  <table class="ledger">
+    <thead>
+      <tr><th>Unit</th><th class="num">Charge</th><th class="num">Paid so far</th><th class="num">Remaining</th></tr>
+    </thead>
+    <tbody>
+      {% for r in unpaid_units %}
+      <tr>
+        <td>Unit {{ r.unit_number }}</td>
+        <td class="num amount">{{ r.charge_amount|money }}</td>
+        <td class="num amount">{{ r.paid_amount|money }}</td>
+        <td class="num amount" style="color: var(--danger); font-weight: 600;">{{ r.remaining|money }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-row">Every unit has paid this month's charge in full.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 <div class="panel">

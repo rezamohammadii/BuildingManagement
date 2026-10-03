@@ -4,7 +4,7 @@
 <div class="page-head">
   <div>
     <h1>Water Bill — {{ bill.bill_month }}</h1>
-    <div class="sub">Total {{ "%.0f"|format(bill.total_amount) }} split across {{ bill.total_people }} people</div>
+    <div class="sub">Total {{ bill.total_amount|money }} split across {{ bill.total_people }} people</div>
   </div>
   <a href="{{ url_for('water_page') }}" class="btn secondary">Back to list</a>
 </div>
@@ -20,7 +20,7 @@
       <tr>
         <td>Unit {{ s.unit_number }}</td>
         <td class="num">{{ s.people_count }}</td>
-        <td class="num amount">{{ "%.0f"|format(s.share_amount) }}</td>
+        <td class="num amount">{{ s.share_amount|money }}</td>
       </tr>
       {% else %}
       <tr><td colspan="3" class="empty-row">No shares found.</td></tr>

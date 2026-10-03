@@ -35,7 +35,7 @@
 <div class="panel">
   <div class="panel-head">
     <h2>All expenses ({{ expenses|length }})</h2>
-    <span class="muted amount">Total: {{ "%.0f"|format(total) }}</span>
+    <span class="muted amount">Total: {{ total|money }}</span>
   </div>
   <table class="ledger">
     <thead>
@@ -45,7 +45,7 @@
       {% for e in expenses %}
       <tr>
         <td>{{ e.title }}</td>
-        <td class="num amount">{{ "%.0f"|format(e.amount) }}</td>
+        <td class="num amount">{{ e.amount|money }}</td>
         <td>{{ e.expense_date }}</td>
         <td class="actions">
           <a href="{{ url_for('edit_expense_page', expense_id=e.id) }}" class="btn secondary small">Edit</a>

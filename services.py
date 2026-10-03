@@ -181,6 +181,46 @@ def get_total_payments() -> float:
     return row["total"]
 
 
+def get_payment_status_for_month(month_prefix: str):
+    """
+    For every unit, how much it has paid in the given Jalali month
+    (month_prefix is 'YYYY-MM') compared to the current monthly charge.
+    Returns a list of dicts: unit_number, people_count, paid_amount,
+    charge_amount, remaining, is_paid.
+    """
+    conn = get_connection()
+    settings_row = conn.execute("SELECT charge_amount FROM settings WHERE id = 1").fetchone()
+    charge_amount = settings_row["charge_amount"] if settings_row else 0
+
+    units = conn.execute("SELECT * FROM units ORDER BY unit_number").fetchall()
+    result = []
+    for u in units:
+        paid_row = conn.execute(
+            "SELECT COALESCE(SUM(amount), 0) AS total FROM payments "
+            "WHERE unit_number = ? AND payment_date LIKE ?",
+            (u["unit_number"], month_prefix + "%"),
+        ).fetchone()
+        paid_amount = paid_row["total"]
+        is_paid = charge_amount > 0 and paid_amount >= charge_amount
+        result.append({
+            "unit_number": u["unit_number"],
+            "people_count": u["people_count"],
+            "paid_amount": paid_amount,
+            "charge_amount": charge_amount,
+            "remaining": max(charge_amount - paid_amount, 0),
+            "is_paid": is_paid,
+        })
+    conn.close()
+    return result
+
+
+def get_unpaid_units_for_month(month_prefix: str):
+    """Units that have not fully paid the monthly charge for the given month."""
+    return [
+        r for r in get_payment_status_for_month(month_prefix) if not r["is_paid"]
+    ]
+
+
 # --------------------------------------------------------------------------
 # Water bills
 # --------------------------------------------------------------------------
@@ -370,6 +410,7 @@ def export_to_excel() -> str:
     header_fill = PatternFill(start_color="1F6FEB", end_color="1F6FEB", fill_type="solid")
     header_font = Font(bold=True, color="FFFFFF")
     title_font = Font(bold=True, size=14)
+    money_format = "#,##0"
 
     ws = wb.active
     ws.title = "Summary"
@@ -390,6 +431,7 @@ def export_to_excel() -> str:
         ("Net balance", summary["net_balance"]),
     ]:
         ws.append(row)
+        ws.cell(row=ws.max_row, column=2).number_format = money_format
     ws.column_dimensions["A"].width = 32
     ws.column_dimensions["B"].width = 18
 
@@ -400,6 +442,7 @@ def export_to_excel() -> str:
         cell.fill = header_fill
     for p in list_payments():
         ws2.append([p["unit_number"], p["amount"], p["payment_date"]])
+        ws2.cell(row=ws2.max_row, column=2).number_format = money_format
     for col, width in zip("ABC", (12, 16, 14)):
         ws2.column_dimensions[col].width = width
 
@@ -410,6 +453,7 @@ def export_to_excel() -> str:
         cell.fill = header_fill
     for e in list_expenses():
         ws3.append([e["title"], e["amount"], e["expense_date"]])
+        ws3.cell(row=ws3.max_row, column=2).number_format = money_format
     for col, width in zip("ABC", (28, 16, 14)):
         ws3.column_dimensions[col].width = width
 
@@ -420,6 +464,8 @@ def export_to_excel() -> str:
         cell.fill = header_fill
     for b in list_water_bills():
         ws4.append([b["bill_month"], b["total_amount"], b["total_people"], b["cost_per_person"]])
+        ws4.cell(row=ws4.max_row, column=2).number_format = money_format
+        ws4.cell(row=ws4.max_row, column=4).number_format = money_format
     for col, width in zip("ABCD", (14, 16, 14, 16)):
         ws4.column_dimensions[col].width = width
 
